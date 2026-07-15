@@ -66,7 +66,7 @@ UiPath(商用RPAベンダー)の画面スクレイピング方式比較が定量
 
 ### 2.2 OCR エンジンの選択
 
-- **Windows.Media.Ocr (OS標準)**: Windows 10 初期ビルドから搭載され外部依存なしで利用可能。`RecognizeAsync` に `SoftwareBitmap` を渡すと、行(OcrLine)→単語(OcrWord)の階層で**テキスト+位置+サイズ**が返り、オーバーレイ表示に必要な座標が直接得られる(出典: [Microsoft Learn](https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr.ocrengine))。
+- **Windows.Media.Ocr (OS標準)**: Windows 10 初期ビルドから搭載され外部依存なしで利用可能。**追加検証済み(2026-07-16)**: 公式リファレンスで「Device family: Windows 10 (introduced in 10.0.10240.0)」「API contract: Windows.Foundation.UniversalApiContract (introduced in v1.0)」と明記されており、Windows 10の最初期ビルドから利用可能という記述は正確と確認。`RecognizeAsync` に `SoftwareBitmap` を渡すと、行(OcrLine)→単語(OcrWord)の階層で**テキスト+位置+サイズ**が返り、オーバーレイ表示に必要な座標が直接得られる(出典: [Microsoft Learn](https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr.ocrengine))。
 - 既存OSS Translumo は Windows OCR / Tesseract 5.2 / EasyOCR の3エンジンをサポートするが、**「Windows OCRのみの使用を推奨」**とし、Tesseract は「古く、遅く、エラーが多い」、EasyOCR は「さらに遅い」と明記している(出典: [Translumo README](https://github.com/ramjke/Translumo))。
 - Tesseract 5.5 は CPU のみで請求書画像を約0.77秒処理、PaddleOCR は同条件4.85秒という比較ブログがある(出典: codesota.com、ブログ品質のため参考値)。
 - **Windows App SDK の新 Text Recognition API** は Windows.Media.Ocr より高速・高精度とMicrosoftは主張するが、**NPU搭載機(Copilot+ PC)専用**であり、一般PCでは使えない。**追加検証済み(2026-07-16、一次ソース再確認)**: 「They run exclusively on devices with a neural processing unit (NPU), making them faster and more accurate than the legacy Windows.Media.Ocr.OcrEngine APIs」と明記されており、NPU専用という制約は事実として確定。バウンディングボックス・信頼度スコア(`word.BoundingBox`, `word.Confidence`)も提供されることを確認(出典: [Microsoft Learn](https://learn.microsoft.com/en-us/windows/ai/apis/text-recognition))。一般的なNPU非搭載PC向けには使えないため、将来のオプション扱いが妥当という結論は維持。
@@ -128,7 +128,7 @@ flowchart LR
 | OPUS-MT (+ CTranslate2) | 小型 | 高速(int8量子化で更に向上) | ドラフト品質のベースライン向き | **Apache-2.0** |
 | FuguMT (日英特化) | 約300MB | 高速 | Sugoi-v4同等との評価(フォーラム情報) | 要確認 |
 | ~~Sugoi-v4~~ | 約300MB(全体約1GB) | CTranslate2でint8量子化可 | 日英ゲーム翻訳で定評だが**方向は日→英(ja→en)専用と確認。英→日の要件には適用不可** | 要確認 |
-| NLLB-200 | 大 | 中 | 広カバレッジ | **CC-BY-NC-4.0(非商用)— 商用配布に制約** |
+| NLLB-200 | 大 | 中 | 広カバレッジ | **CC-BY-NC-4.0(非商用)— 商用配布に制約**(**追加検証済み**: モデルカードに「NLLB-200 is a research model and is not released for production deployment」と明記。商用の画面翻訳ソフトへの組み込みは不可) |
 | ローカルLLM (Qwen 32B級) | 数十GB | 遅 | 英→日はクラウド品質の80〜90%程度との評価 | — |
 
 出典: [Mozilla Hacks](https://hacks.mozilla.org/2022/06/training-efficient-neural-network-models-for-firefox-translations/) / HuggingFaceフォーラム / insiderllm.com / AMD ROCmブログ / Hugging Face(Sugoi-v4-ja-en-ct2)
@@ -163,8 +163,8 @@ flowchart LR
 
 | ソフト | 言語/FW | テキスト取得 | 翻訳エンジン | 特徴 |
 |--------|---------|--------------|--------------|------|
-| [Translumo](https://github.com/ramjke/Translumo) | C# / .NET 8 / WPF | OCR 3種併用(Windows OCR推奨) + MLで最良結果を選択 | クラウドのみ(DeepL推奨/Google/Yandex/Papago) | 低レイテンシを設計目標に明記。オーバーレイ表示 |
-| [MORT](https://github.com/killkimno/mort) | C# / .NET 9 | OCR 5種切替(Tesseract/Windows OCR/Google Vision/Snipping Tool OCR/EasyOCR) | Papago/Google/DeepL/ezTrans(ローカル) + カスタムHTTP APIでLibreTranslate・NLLB等も接続可 | OCRと翻訳の完全分離・プラガブル構成 |
+| [Translumo](https://github.com/ramjke/Translumo) | C# / .NET 8 / WPF | OCR 3種併用(Windows OCR推奨) + MLで最良結果を選択 | クラウドのみ(DeepL推奨/Google/Yandex/Papago) | 低レイテンシを設計目標に明記。オーバーレイ表示。**(追加検証済み: READMEの記述と完全一致を確認)** |
+| [MORT](https://github.com/killkimno/mort) | C# / .NET 9 | OCR 5種切替(Tesseract/Windows OCR/Google Vision/Snipping Tool OCR/EasyOCR) | Papago/Google/DeepL/ezTrans(ローカル) + カスタムHTTP APIでLibreTranslate・NLLB等も接続可 | OCRと翻訳の完全分離・プラガブル構成。**(追加検証済み: READMEの記述と完全一致を確認。要件はWindows 10以上・.NET 9以上・C# 100%)** |
 | [LunaTranslator](https://github.com/HIllya51/LunaTranslator) | Python主体 | **プロセスフック主軸** + OCR補助 | ほぼ全対応(LLM/オフライン/クラウド)の抽象化レイヤー | ゲーム特化。フックはOCR不要で高速・高精度だが対象を選ぶ |
 | PCOT | (C#/.NET, 知識ベース) | 範囲指定OCR | クラウド系 | 今回の調査ではソースを直接取得できず(未検証) |
 
@@ -203,7 +203,11 @@ flowchart LR
   - Bergamotの「47倍小型・37倍高速」 → **en-pt限定の実測値と判明。英→日への一般化は未実証**(レポートの記述を修正済み)。
   - クラウドAPI(Google/Azure/DeepL)のレイテンシ比較 → **ブログ間の数値の食い違いはリージョン依存の測定条件差と判明。ベンダー間の恒常的な速度差は小さいと結論**(レポートの記述を修正済み)。
   - Sugoi-v4の翻訳方向 → **日→英(ja→en)専用と確認。英→日要件には不適合**(レポートで除外扱いに修正済み)。
-- **出典引用あり・未検証(上記以外)**: 本レポートの残りの主張は一次ソース(Microsoft Learn、各OSSのREADME、Mozilla公式ブログ)からの引用付き抽出だが、deep-researchワークフローの敵対的検証フェーズがセッションリミットで大半未完了(優先度Bの項目: OcrEngineの対応バージョン、NLLB-200のライセンス、各OSSのREADME記載内容など)。一次ソース由来のため確度は高いが、実装前に該当ドキュメントの現物確認を推奨。
+- **追加検証済み(2026-07-16、優先度B)**:
+  - OcrEngineの対応バージョン → **一次ソースで確認・確定**(Windows 10 10.0.10240.0 / UniversalApiContract v1.0から利用可能)。
+  - NLLB-200のライセンス → **一次ソースで確認・確定**(CC-BY-NC-4.0、モデルカードに「research model, not released for production deployment」と明記。商用利用不可)。
+  - Translumo/MORTのREADME記載内容(OCR・翻訳エンジン構成、実装言語/FW) → **両方とも再取得し、レポートの記述と完全一致を確認**。
+- **出典引用あり・未検証(上記以外)**: 本レポートの残りの主張(LunaTranslatorのREADME詳細、UI Automation TextPatternの仕様詳細など)は一次ソースからの引用付き抽出だが、deep-researchワークフローの敵対的検証フェーズがセッションリミットで大半未完了。一次ソース由来のため確度は高いが、実装前に該当ドキュメントの現物確認を推奨。
 - **ブログ由来の数値(要注意)**: Tesseract vs PaddleOCR速度比較(codesota.com)は測定条件不明のブログ情報。**採用判断には自前ベンチマークが必須**。
 - **知識ベースの推測(未出典)**: クリックスルーオーバーレイの実装詳細(WS_EX_*スタイル)、BitBltの黒画面問題、WinUI 3の透過制約、PCOTの構成。
 - **未解決の重要な不確実性**: 英→日方向で実用的な速度・品質を持つ軽量ローカルNMTモデルの具体的な候補(OPUS-MT/NLLB系の英日ペア実測値)は今回の調査で特定できなかった。PoC②で最優先に確認すべき事項。
