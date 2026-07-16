@@ -56,9 +56,11 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<ITranslationCache>(_ => new LruTranslationCache());
+        services.AddSingleton<ICircuitBreaker>(_ => new ConsecutiveFailureCircuitBreaker());
         services.AddSingleton<ITranslationOrchestrator>(sp => new TranslationOrchestrator(
             sp.GetServices<ITranslator>().ToList(),
-            sp.GetRequiredService<ITranslationCache>()));
+            sp.GetRequiredService<ITranslationCache>(),
+            sp.GetRequiredService<ICircuitBreaker>()));
 
         services.AddSingleton<SelectionPopupViewModel>();
         services.AddSingleton<ISelectionPopupController>(sp =>
