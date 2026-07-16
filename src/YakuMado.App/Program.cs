@@ -26,7 +26,7 @@ var provider = services.BuildServiceProvider();
 var settingsRepository = provider.GetRequiredService<ITranslationSettingsRepository>();
 var settings = await settingsRepository.LoadAsync(CancellationToken.None);
 
-Console.WriteLine("YakuMado Phase 3: 選択テキスト翻訳 + 画面オーバーレイ翻訳MVP");
+Console.WriteLine("YakuMado: 選択テキスト翻訳 + 画面オーバーレイ翻訳");
 Console.WriteLine($"設定ファイル: {settingsFilePath}");
 Console.WriteLine($"登録済み翻訳エンジン数: {settings.EnginePriorityOrder.Count}");
 
@@ -37,9 +37,9 @@ if (!azureAvailable)
 {
     Console.WriteLine("警告: AZURE_TRANSLATOR_KEY環境変数が未設定のため、実際の翻訳は行えません。");
 }
-Console.WriteLine("ホットキー: Ctrl+Alt+T=選択テキスト翻訳 / Ctrl+Alt+O=画面オーバーレイ翻訳(トグル)。Ctrl+Cで終了。");
+Console.WriteLine("ホットキー: Ctrl+Alt+T=選択テキスト翻訳 / Ctrl+Alt+O=画面オーバーレイ翻訳(トグル)。トレイアイコンから終了できます。");
 
-// WPFのHwndSource/Windowを扱うためSTAスレッドで実行する
+// WPFのHwndSource/Window/トレイアイコンを扱うためSTAスレッドで実行する
 var uiThread = new Thread(() => RunUi(provider, azureAvailable));
 uiThread.SetApartmentState(ApartmentState.STA);
 uiThread.Start();
@@ -52,10 +52,11 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
     const uint VK_T = 0x54;
     const uint VK_O = 0x4F;
 
-    var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+    var app = new System.Windows.Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
 
     var selectionHotkey = new GlobalHotkeyService(MOD_CONTROL | MOD_ALT, VK_T);
     var overlayHotkey = new GlobalHotkeyService(MOD_CONTROL | MOD_ALT, VK_O);
+    var trayIcon = new TrayIconController();
 
     var acquisitionChain = provider.GetRequiredService<ISelectionAcquisitionChain>();
     var orchestrator = provider.GetRequiredService<ITranslationOrchestrator>();
@@ -67,7 +68,7 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
     var overlayWindowController = provider.GetRequiredService<IOverlayWindowController>();
     var isOverlayVisible = false;
 
-    selectionHotkey.SelectionTranslateRequested += async (_, _) =>
+    async void OnSelectionTranslateRequested()
     {
         var selectedText = await acquisitionChain.AcquireAsync(CancellationToken.None);
         if (string.IsNullOrEmpty(selectedText))
@@ -94,9 +95,9 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
         {
             Console.WriteLine($"翻訳に失敗しました: {ex.Message}");
         }
-    };
+    }
 
-    overlayHotkey.SelectionTranslateRequested += async (_, _) =>
+    async void OnOverlayTranslateToggleRequested()
     {
         if (isOverlayVisible)
         {
@@ -138,7 +139,14 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
         {
             Console.WriteLine($"画面オーバーレイ翻訳に失敗しました: {ex.Message}");
         }
-    };
+    }
+
+    selectionHotkey.SelectionTranslateRequested += (_, _) => OnSelectionTranslateRequested();
+    overlayHotkey.SelectionTranslateRequested += (_, _) => OnOverlayTranslateToggleRequested();
+
+    trayIcon.SelectionTranslateRequested += (_, _) => OnSelectionTranslateRequested();
+    trayIcon.OverlayTranslateToggleRequested += (_, _) => OnOverlayTranslateToggleRequested();
+    trayIcon.ExitRequested += (_, _) => app.Dispatcher.InvokeShutdown();
 
     selectionHotkey.Register();
     overlayHotkey.Register();
@@ -153,4 +161,5 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
 
     selectionHotkey.Unregister();
     overlayHotkey.Unregister();
+    trayIcon.Dispose();
 }
