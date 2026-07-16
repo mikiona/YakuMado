@@ -15,6 +15,7 @@ public sealed class TrayIconController : IDisposable
     public event EventHandler? ExitRequested;
     public event EventHandler? SelectionTranslateRequested;
     public event EventHandler? OverlayTranslateToggleRequested;
+    public event EventHandler? SettingsRequested;
 
     public TrayIconController()
     {
@@ -27,9 +28,14 @@ public sealed class TrayIconController : IDisposable
         var overlayItem = new ToolStripMenuItem("画面オーバーレイ翻訳(&O)  Ctrl+Alt+O");
         overlayItem.Click += (_, _) => OverlayTranslateToggleRequested?.Invoke(this, EventArgs.Empty);
 
+        var settingsItem = new ToolStripMenuItem("設定(&S)...");
+        settingsItem.Click += (_, _) => SettingsRequested?.Invoke(this, EventArgs.Empty);
+
         var contextMenu = new ContextMenuStrip();
         contextMenu.Items.Add(selectionItem);
         contextMenu.Items.Add(overlayItem);
+        contextMenu.Items.Add(new ToolStripSeparator());
+        contextMenu.Items.Add(settingsItem);
         contextMenu.Items.Add(new ToolStripSeparator());
         contextMenu.Items.Add(exitItem);
 

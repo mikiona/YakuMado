@@ -40,12 +40,16 @@ if (!azureAvailable)
 Console.WriteLine("ホットキー: Ctrl+Alt+T=選択テキスト翻訳 / Ctrl+Alt+O=画面オーバーレイ翻訳(トグル)。トレイアイコンから終了できます。");
 
 // WPFのHwndSource/Window/トレイアイコンを扱うためSTAスレッドで実行する
-var uiThread = new Thread(() => RunUi(provider, azureAvailable));
+var uiThread = new Thread(() => RunUi(provider, azureAvailable, settings, settingsRepository));
 uiThread.SetApartmentState(ApartmentState.STA);
 uiThread.Start();
 uiThread.Join();
 
-static void RunUi(IServiceProvider provider, bool azureAvailable)
+static void RunUi(
+    IServiceProvider provider,
+    bool azureAvailable,
+    TranslationSettings currentSettings,
+    ITranslationSettingsRepository settingsRepository)
 {
     const uint MOD_CONTROL = 0x0002;
     const uint MOD_ALT = 0x0001;
@@ -144,8 +148,17 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
     selectionHotkey.SelectionTranslateRequested += (_, _) => OnSelectionTranslateRequested();
     overlayHotkey.SelectionTranslateRequested += (_, _) => OnOverlayTranslateToggleRequested();
 
+    void OnSettingsRequested()
+    {
+        var translators = provider.GetServices<ITranslator>().ToList();
+        var settingsViewModel = new SettingsViewModel(currentSettings, translators);
+        var settingsWindow = new SettingsWindow(settingsViewModel, settingsRepository);
+        settingsWindow.ShowDialog();
+    }
+
     trayIcon.SelectionTranslateRequested += (_, _) => OnSelectionTranslateRequested();
     trayIcon.OverlayTranslateToggleRequested += (_, _) => OnOverlayTranslateToggleRequested();
+    trayIcon.SettingsRequested += (_, _) => OnSettingsRequested();
     trayIcon.ExitRequested += (_, _) => app.Dispatcher.InvokeShutdown();
 
     selectionHotkey.Register();
