@@ -112,6 +112,13 @@ static void RunUi(IServiceProvider provider, bool azureAvailable)
             return;
         }
 
+        if (!ocrEngine.IsAvailable)
+        {
+            Console.WriteLine("英語のOCR言語パックがインストールされていないため、画面オーバーレイ翻訳は実行できません。");
+            Console.WriteLine("Windowsの「設定 > 時刻と言語 > 言語と地域」から英語の言語パックを追加してください。");
+            return;
+        }
+
         try
         {
             var region = new ScreenRect(

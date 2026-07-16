@@ -14,24 +14,30 @@ namespace YakuMado.Ocr;
 /// </summary>
 public sealed class WindowsOcrEngine : IOcrEngine
 {
-    private readonly OcrEngine _engine;
+    private readonly string _bcp47LanguageTag;
+    private readonly OcrEngine? _engine;
+
+    public bool IsAvailable => _engine != null;
 
     public WindowsOcrEngine(string bcp47LanguageTag = "en")
     {
+        _bcp47LanguageTag = bcp47LanguageTag;
         var language = new Language(bcp47LanguageTag);
-        _engine = OcrEngine.TryCreateFromLanguage(language)
-            ?? throw new InvalidOperationException(
-                $"OCR言語 '{bcp47LanguageTag}' が対応言語パックとしてインストールされていません。");
+        _engine = OcrEngine.TryCreateFromLanguage(language);
     }
 
     public async Task<CoreOcrResult> RecognizeAsync(IScreenBitmap bitmap, CancellationToken cancellationToken)
     {
+        var engine = _engine ?? throw new InvalidOperationException(
+            $"OCR言語 '{_bcp47LanguageTag}' が対応言語パックとしてインストールされていません。" +
+            "設定 > 時刻と言語 > 言語と地域 から言語パックを追加してください。");
+
         using var softwareBitmap = new SoftwareBitmap(
             BitmapPixelFormat.Bgra8, bitmap.Width, bitmap.Height, BitmapAlphaMode.Premultiplied);
         softwareBitmap.CopyFromBuffer(bitmap.GetPixelData().AsBuffer());
 
         cancellationToken.ThrowIfCancellationRequested();
-        var ocrResult = await _engine.RecognizeAsync(softwareBitmap);
+        var ocrResult = await engine.RecognizeAsync(softwareBitmap);
 
         var lines = ocrResult.Lines
             .Select(line => new OcrTextLine(line.Text, ComputeBoundingRect(line)))

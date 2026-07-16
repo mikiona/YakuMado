@@ -3,6 +3,9 @@ namespace YakuMado.Core.Ocr;
 /// <summary>画面キャプチャ画像からテキストを認識する抽象化。一次実装はWindows.Media.Ocr.OcrEngineをラップする。</summary>
 public interface IOcrEngine
 {
+    /// <summary>対象言語のOCR言語パックがOSにインストールされているかどうかの自己申告。</summary>
+    bool IsAvailable { get; }
+
     Task<OcrResult> RecognizeAsync(IScreenBitmap bitmap, CancellationToken cancellationToken);
 }
 
