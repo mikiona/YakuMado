@@ -1,0 +1,12 @@
+# .NET
+bin/
+obj/
+*.user
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# ローカル一時ファイル
+poc/LocalNmtPoc/poc_result.txt
