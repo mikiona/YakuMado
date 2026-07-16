@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using YakuMado.Core.Ocr;
+using YakuMado.Core.Overlay;
 using YakuMado.Core.TextAcquisition;
 using YakuMado.Core.Translation;
+using YakuMado.Ocr;
 using YakuMado.Overlay;
 using YakuMado.Settings;
 using YakuMado.TextAcquisition;
@@ -51,6 +54,20 @@ public static class ServiceCollectionExtensions
             sp.GetRequiredService<ITranslationCache>()));
 
         services.AddSingleton<SelectionPopupViewModel>();
+        services.AddSingleton<ISelectionPopupController>(sp =>
+            new WpfSelectionPopupController(sp.GetRequiredService<SelectionPopupViewModel>()));
+
+        return services;
+    }
+
+    /// <summary>画面オーバーレイ翻訳MVP(Phase 3)に必要なサービスを登録する。</summary>
+    public static IServiceCollection AddOverlayTranslationFeature(this IServiceCollection services)
+    {
+        services.AddSingleton<IScreenCaptureService, GdiScreenCaptureService>();
+        services.AddSingleton<IFrameChangeDetector, PixelHashFrameChangeDetector>();
+        services.AddSingleton<IOcrEngine>(_ => new WindowsOcrEngine("en"));
+        services.AddSingleton(sp => new OcrOverlayContentBuilder(sp.GetRequiredService<ITranslationOrchestrator>()));
+        services.AddSingleton<IOverlayWindowController, WpfOverlayWindowController>();
 
         return services;
     }

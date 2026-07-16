@@ -63,8 +63,11 @@ Windows上で、Webブラウザや各種アプリケーション画面に表示�
 
 - **英→日ローカルNMTモデルのライセンスが未確認**: Phase 0のPoC②(`docs/poc-phase0-results.md`)で、Argos Translate(CTranslate2ベース)経由のen→jaモデルが技術的な実用性(速度47〜86ms/文、品質は6文中4文良好)を持つことを確認した。ただしArgos Translate本体はMIT/CC0デュアルライセンスである一方、配布される翻訳モデルデータ自体のライセンスはリポジトリ・パッケージインデックスのいずれにも明記が見つからず、商用利用可否が未解決。Phase 4着手前にライセンスの確認(配布元への問い合わせ等)を優先タスクとする。
 - 上記モデルは誤訳も一定数(PoC②で6文中1件)発生しており、単独運用でなくクラウドとのハイブリッド構成・サーキットブレーカーによる品質担保が引き続き重要。
+- **Windows OCR英語言語パックの前提条件(Phase 3実装検証で新規判明)**: 画面オーバーレイ翻訳(F2)はWindows.Media.Ocrに依存するが、英語(en)OCR言語パックがOSにインストールされていない環境では動作しない(`OcrEngine.TryCreateFromLanguage`がnullを返す)。エンドユーザー環境でのインストール状況は前提にできないため、未インストール時の検知・ユーザーへの案内(設定アプリへの導線)をPhase 6で実装する必要がある。詳細は `docs/phase3-verification-notes.md` を参照。
 
 ## 7. 参照ドキュメント
 
 - 技術調査レポート: `docs/tech-research-screen-translation.md`
+- Phase 0 PoC結果: `docs/poc-phase0-results.md`
+- Phase 3実機検証メモ: `docs/phase3-verification-notes.md`
 - アーキテクチャ設計: `docs/architecture.md`

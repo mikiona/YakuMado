@@ -11,4 +11,7 @@ public interface IScreenBitmap
 {
     int Width { get; }
     int Height { get; }
+
+    /// <summary>フレーム変化検知等で使用する生ピクセルデータ。</summary>
+    byte[] GetPixelData();
 }

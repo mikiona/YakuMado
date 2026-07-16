@@ -167,7 +167,7 @@ public interface IFrameChangeDetector
 }
 ```
 
-`Windows.Graphics.Capture` を採用する(BitBltは一部アプリで黒画面問題が確認されているため不採用)。`IFrameChangeDetector` は再翻訳の要否判定に用い、非同期翻訳完了までの再出現(F2の「再出現時50ms以内」)をキャッシュと組み合わせて実現する。
+当初は `Windows.Graphics.Capture` を推奨としていた(BitBltは一部アプリで黒画面問題が報告されているため)が、Phase 3実装では実装コストと動作確認の容易さを優先し、`Graphics.CopyFromScreen`(GDI BitBlt)による暫定実装(`GdiScreenCaptureService`)を先行させた。実機確認では黒画面問題は再現しなかったが、環境(GPU/描画方式)によっては再現しうるため、既知の技術的負債として残っている。`Windows.Graphics.Capture`への置き換えは将来のフェーズで検討する(詳細は `docs/phase3-verification-notes.md` 参照)。`IFrameChangeDetector` は再翻訳の要否判定に用い、非同期翻訳完了までの再出現(F2の「再出現時50ms以内」)をキャッシュと組み合わせて実現する。
 
 ### 4.6 オーバーレイ表示(Overlay)
 

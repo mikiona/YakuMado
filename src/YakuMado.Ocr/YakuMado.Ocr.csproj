@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\YakuMado.Core\YakuMado.Core.csproj" />
-    <ProjectReference Include="..\YakuMado.Translation.Orchestration\YakuMado.Translation.Orchestration.csproj" />
   </ItemGroup>
 
 </Project>

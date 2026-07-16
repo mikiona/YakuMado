@@ -21,8 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\YakuMado.Core\YakuMado.Core.csproj" />
-    <ProjectReference Include="..\..\src\YakuMado.Overlay\YakuMado.Overlay.csproj" />
-    <ProjectReference Include="..\..\src\YakuMado.Translation.Orchestration\YakuMado.Translation.Orchestration.csproj" />
+    <ProjectReference Include="..\..\src\YakuMado.Ocr\YakuMado.Ocr.csproj" />
   </ItemGroup>
 
 </Project>
