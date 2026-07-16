@@ -7,6 +7,18 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- 配布用publish設定(dotnet publish -c Release時に有効): 単一実行ファイル・自己完結型 -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <!-- WFAC010: WinForms(NotifyIcon用)アナライザはApplication.SetHighDpiMode APIでの設定を推奨するが、
+         本アプリは主にWPFのためmanifestベースのPerMonitorV2指定を採用する(意図的な選択) -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
