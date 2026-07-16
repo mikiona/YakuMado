@@ -66,6 +66,7 @@ Windows上で、Webブラウザや各種アプリケーション画面に表示�
   - 関連Issue #76で開発者本人(PJ-Finlay)は「モデルはコードと同じMIT/CC0のつもりだが、学習データの一部はライセンス不明な学術データであり、公開データでの学習はフェアユースだと思うが自分は弁護士ではない」と明言しており、法的な保証はしていない。
   - 別のコミュニティ監査(miro-janosik氏)でも「一部モデルは学習データソース自体が商用利用不可」と指摘されており、Argosのモデル群全体として商用利用リスクが残ることが二次的に裏付けられている。
   - **結論**: 現時点でArgos Translateのen_jaモデルを商用製品に組み込むことは推奨しない。次のいずれかの対応が必要: (a) 開発者への直接確認(Issueへの追加コメント等)、(b) 明確に商用利用可能なライセンス(例: CC-BY-4.0と確認できるOPUS-MT個別モデル)への切り替え、(c) ローカルNMTを見送りクラウドAPIのみで運用。この判断はプロダクトの法的リスクに関わるため、実装者の技術判断だけで決定せずユーザー(プロダクトオーナー)の意思決定を要する。
+  - **対応方針(ユーザー確認済み)**: Phase 4では「試験的に組み込む(ライセンス要確認のまま)」方針を採用。既定で無効(環境変数`YAKUMADO_ENABLE_EXPERIMENTAL_LOCAL_NMT`等による明示的オプトインでのみ有効化)の実験的機能として実装し、商用配布前の法務確認が必須である旨を`runtime/local-nmt/README.md`に明記した。詳細は `docs/phase4-verification-notes.md` を参照。
 - 上記モデルは誤訳も一定数(PoC②で6文中1件)発生しており、単独運用でなくクラウドとのハイブリッド構成・サーキットブレーカーによる品質担保が引き続き重要。
 - **Windows OCR英語言語パックの前提条件(Phase 3実装検証で新規判明)**: 画面オーバーレイ翻訳(F2)はWindows.Media.Ocrに依存するが、英語(en)OCR言語パックがOSにインストールされていない環境では動作しない(`OcrEngine.TryCreateFromLanguage`がnullを返す)。エンドユーザー環境でのインストール状況は前提にできないため、未インストール時の検知・ユーザーへの案内(設定アプリへの導線)をPhase 6で実装する必要がある。詳細は `docs/phase3-verification-notes.md` を参照。
 
@@ -74,4 +75,5 @@ Windows上で、Webブラウザや各種アプリケーション画面に表示�
 - 技術調査レポート: `docs/tech-research-screen-translation.md`
 - Phase 0 PoC結果: `docs/poc-phase0-results.md`
 - Phase 3実機検証メモ: `docs/phase3-verification-notes.md`
+- Phase 4実機検証メモ: `docs/phase4-verification-notes.md`
 - アーキテクチャ設計: `docs/architecture.md`

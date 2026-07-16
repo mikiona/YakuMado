@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using YakuMado.App;
 using YakuMado.Core.TextAcquisition;
@@ -61,5 +62,19 @@ public class ServiceCollectionExtensionsTests
 
         var translator = provider.GetRequiredService<ITranslator>();
         Assert.False(translator.IsAvailable);
+    }
+
+    [Fact]
+    public void AddSelectionTranslationFeature_registers_both_local_and_cloud_translators()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSelectionTranslationFeature();
+        var provider = services.BuildServiceProvider();
+
+        var translators = provider.GetServices<ITranslator>().ToList();
+
+        Assert.Contains(translators, t => t.EngineName.Contains("ArgosLocalTranslator"));
+        Assert.Contains(translators, t => t.EngineName == "AzureTranslator");
     }
 }

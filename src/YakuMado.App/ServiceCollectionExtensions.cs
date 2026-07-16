@@ -8,6 +8,7 @@ using YakuMado.Overlay;
 using YakuMado.Settings;
 using YakuMado.TextAcquisition;
 using YakuMado.Translation.Cloud;
+using YakuMado.Translation.Local;
 using YakuMado.Translation.Orchestration;
 
 namespace YakuMado.App;
@@ -38,6 +39,12 @@ public static class ServiceCollectionExtensions
             sp.GetRequiredService<UiAutomationSelectionProvider>(),
             sp.GetRequiredService<ClipboardSelectionProvider>(),
         }));
+
+        // 実験的ローカルNMT(Phase 4)。ライセンス未確定のため既定では無効(runtime/local-nmt/README.md参照)。
+        // 優先順位はローカル→クラウドとし、ローカルが利用不可の場合はTranslationOrchestratorが自動でクラウドへフォールバックする。
+        services.AddSingleton<ITranslator>(_ => new ArgosLocalTranslator(
+            Environment.GetEnvironmentVariable("YAKUMADO_LOCAL_NMT_PYTHON_PATH") ?? string.Empty,
+            Environment.GetEnvironmentVariable("YAKUMADO_LOCAL_NMT_SCRIPT_PATH") ?? string.Empty));
 
         services.AddHttpClient();
         services.AddSingleton<ITranslator>(sp =>

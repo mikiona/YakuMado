@@ -19,6 +19,7 @@
     <ProjectReference Include="..\YakuMado.TextAcquisition\YakuMado.TextAcquisition.csproj" />
     <ProjectReference Include="..\YakuMado.Translation.Orchestration\YakuMado.Translation.Orchestration.csproj" />
     <ProjectReference Include="..\YakuMado.Translation.Cloud\YakuMado.Translation.Cloud.csproj" />
+    <ProjectReference Include="..\YakuMado.Translation.Local\YakuMado.Translation.Local.csproj" />
     <ProjectReference Include="..\YakuMado.Overlay\YakuMado.Overlay.csproj" />
     <ProjectReference Include="..\YakuMado.Ocr\YakuMado.Ocr.csproj" />
   </ItemGroup>
