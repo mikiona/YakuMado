@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YakuMado.App/YakuMado.App.csproj" />
+    <Project Path="src/YakuMado.Core/YakuMado.Core.csproj" />
+    <Project Path="src/YakuMado.Settings/YakuMado.Settings.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/YakuMado.App.Tests/YakuMado.App.Tests.csproj" />
+    <Project Path="tests/YakuMado.Core.Tests/YakuMado.Core.Tests.csproj" />
+    <Project Path="tests/YakuMado.Settings.Tests/YakuMado.Settings.Tests.csproj" />
+  </Folder>
+</Solution>
