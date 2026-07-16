@@ -5,15 +5,21 @@
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\YakuMado.Core\YakuMado.Core.csproj" />
     <ProjectReference Include="..\YakuMado.Settings\YakuMado.Settings.csproj" />
+    <ProjectReference Include="..\YakuMado.TextAcquisition\YakuMado.TextAcquisition.csproj" />
+    <ProjectReference Include="..\YakuMado.Translation.Orchestration\YakuMado.Translation.Orchestration.csproj" />
+    <ProjectReference Include="..\YakuMado.Translation.Cloud\YakuMado.Translation.Cloud.csproj" />
+    <ProjectReference Include="..\YakuMado.Overlay\YakuMado.Overlay.csproj" />
   </ItemGroup>
 
 </Project>
