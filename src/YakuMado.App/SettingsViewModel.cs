@@ -40,6 +40,7 @@ public sealed class SettingsViewModel
         }
 
         AzureApiKey = initialSettings.ApiKeys.GetValueOrDefault("Azure", string.Empty);
+        AzureRegion = initialSettings.ApiKeys.GetValueOrDefault("AzureRegion", string.Empty);
     }
 
     public void MoveEngineUp(string engineName)
@@ -64,6 +65,10 @@ public sealed class SettingsViewModel
         if (!string.IsNullOrEmpty(AzureApiKey))
         {
             apiKeys["Azure"] = AzureApiKey;
+        }
+        if (!string.IsNullOrEmpty(AzureRegion))
+        {
+            apiKeys["AzureRegion"] = AzureRegion;
         }
 
         return new TranslationSettings(priorityOrder, enabledMap, apiKeys);

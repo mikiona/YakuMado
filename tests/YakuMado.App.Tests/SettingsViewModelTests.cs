@@ -193,4 +193,33 @@ public class SettingsViewModelTests
 
         Assert.Equal("existing-key", vm.AzureApiKey);
     }
+
+    [Fact]
+    public void Constructor_loads_existing_azure_region_from_settings()
+    {
+        var translators = new ITranslator[] { new FakeSettingsTranslator("Azure", true, EnJa) };
+        var settings = new TranslationSettings(
+            EnginePriorityOrder: new[] { "Azure" },
+            EngineEnabled: new Dictionary<string, bool>(),
+            ApiKeys: new Dictionary<string, string> { ["AzureRegion"] = "japaneast" });
+
+        var vm = new SettingsViewModel(settings, translators);
+
+        Assert.Equal("japaneast", vm.AzureRegion);
+    }
+
+    [Fact]
+    public void ToTranslationSettings_includes_azure_region()
+    {
+        var translators = new ITranslator[] { new FakeSettingsTranslator("Azure", true, EnJa) };
+        var settings = new TranslationSettings(
+            EnginePriorityOrder: new[] { "Azure" },
+            EngineEnabled: new Dictionary<string, bool>(),
+            ApiKeys: new Dictionary<string, string>());
+        var vm = new SettingsViewModel(settings, translators) { AzureRegion = "japaneast" };
+
+        var result = vm.ToTranslationSettings();
+
+        Assert.Equal("japaneast", result.ApiKeys["AzureRegion"]);
+    }
 }

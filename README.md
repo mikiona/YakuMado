@@ -86,7 +86,7 @@ dotnet publish src/YakuMado.App/YakuMado.App.csproj -c Release -r win-x64 --self
 
 - **選択テキスト翻訳** — `Ctrl+Alt+T` と同じ動作
 - **画面オーバーレイ翻訳** — `Ctrl+Alt+O` と同じ動作
-- **設定...** — 翻訳エンジンの優先順位・有効/無効、Azure APIキー・リージョンの設定(保存後は反映のためアプリの再起動が必要)
+- **設定...** — 翻訳エンジンの優先順位・有効/無効、Azure APIキー・リージョンの設定。ここで保存したAPIキー・リージョンはDPAPIで暗号化され`設定ファイル`(下記参照)に保存され、`AZURE_TRANSLATOR_KEY`/`AZURE_TRANSLATOR_REGION`環境変数が未設定の場合のフォールバックとして使われる(環境変数が設定されている場合はそちらが優先)。保存後は反映のためアプリの再起動が必要
 - **終了** — アプリを終了する
 
 ### 選択テキスト翻訳の使い方
@@ -105,8 +105,8 @@ dotnet publish src/YakuMado.App/YakuMado.App.csproj -c Release -r win-x64 --self
 
 | 環境変数 | 用途 |
 |---|---|
-| `AZURE_TRANSLATOR_KEY` | Azure Translatorのサブスクリプションキー(クラウド翻訳を有効化) |
-| `AZURE_TRANSLATOR_REGION` | Azure Translatorのリソースリージョン(例: `japaneast`) |
+| `AZURE_TRANSLATOR_KEY` | Azure Translatorのサブスクリプションキー(クラウド翻訳を有効化)。未設定時はトレイの「設定...」で保存したキーにフォールバック |
+| `AZURE_TRANSLATOR_REGION` | Azure Translatorのリソースリージョン(例: `japaneast`)。未設定時は「設定...」で保存したリージョンにフォールバック |
 | `YAKUMADO_ENABLE_EXPERIMENTAL_LOCAL_NMT` | `1` または `true` で実験的ローカルNMTを有効化(既定は無効) |
 | `YAKUMADO_LOCAL_NMT_PYTHON_PATH` | ローカルNMT用Python実行ファイルのパス(`runtime/local-nmt/.venv/Scripts/python.exe`) |
 | `YAKUMADO_LOCAL_NMT_SCRIPT_PATH` | ローカルNMTサーバースクリプトのパス(`runtime/local-nmt/translate_server.py`) |

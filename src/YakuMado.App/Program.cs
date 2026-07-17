@@ -9,6 +9,7 @@ using YakuMado.Core.Overlay;
 using YakuMado.Core.TextAcquisition;
 using YakuMado.Core.Translation;
 using YakuMado.Overlay;
+using YakuMado.Settings;
 using YakuMado.TextAcquisition;
 using YakuMado.Translation.Orchestration;
 
@@ -17,25 +18,28 @@ var settingsFilePath = Path.Combine(
     "YakuMado", "settings.json");
 Directory.CreateDirectory(Path.GetDirectoryName(settingsFilePath)!);
 
+// 翻訳エンジンの優先順位・有効/無効・APIキーの登録(DI合成)に必要なため、
+// サービス構築より先に設定ファイルを読み込む。
+var settings = await new DpapiTranslationSettingsRepository(settingsFilePath).LoadAsync(CancellationToken.None);
+
 var services = new ServiceCollection();
 services.AddYakuMadoCore(settingsFilePath);
-services.AddSelectionTranslationFeature();
+services.AddSelectionTranslationFeature(settings);
 services.AddOverlayTranslationFeature();
 var provider = services.BuildServiceProvider();
 
 var settingsRepository = provider.GetRequiredService<ITranslationSettingsRepository>();
-var settings = await settingsRepository.LoadAsync(CancellationToken.None);
 
 Console.WriteLine("YakuMado: 選択テキスト翻訳 + 画面オーバーレイ翻訳");
 Console.WriteLine($"設定ファイル: {settingsFilePath}");
 Console.WriteLine($"登録済み翻訳エンジン数: {settings.EnginePriorityOrder.Count}");
 
 var azureAvailable = provider.GetRequiredService<ITranslator>().IsAvailable;
-Console.WriteLine($"AzureTranslator利用可否(AZURE_TRANSLATOR_KEY環境変数の有無): {azureAvailable}");
+Console.WriteLine($"AzureTranslator利用可否(環境変数または設定画面で保存したAPIキーの有無): {azureAvailable}");
 
 if (!azureAvailable)
 {
-    Console.WriteLine("警告: AZURE_TRANSLATOR_KEY環境変数が未設定のため、実際の翻訳は行えません。");
+    Console.WriteLine("警告: AzureTranslatorのAPIキーが未設定のため、実際の翻訳は行えません。環境変数AZURE_TRANSLATOR_KEYを設定するか、トレイアイコンの「設定...」からAPIキーを保存してください。");
 }
 Console.WriteLine("ホットキー: Ctrl+Alt+T=選択テキスト翻訳 / Ctrl+Alt+O=画面オーバーレイ翻訳(トグル)。トレイアイコンから終了できます。");
 

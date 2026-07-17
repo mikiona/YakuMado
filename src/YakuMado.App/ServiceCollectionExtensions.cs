@@ -25,8 +25,11 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>選択テキスト翻訳MVP(Phase 2)に必要なサービスを登録する。
-    /// クラウドAPIキーはハードコードせず環境変数(AZURE_TRANSLATOR_KEY / AZURE_TRANSLATOR_REGION)から読み込む。</summary>
-    public static IServiceCollection AddSelectionTranslationFeature(this IServiceCollection services)
+    /// クラウドAPIキーはハードコードせず、環境変数(AZURE_TRANSLATOR_KEY / AZURE_TRANSLATOR_REGION)を
+    /// 優先し、未設定の場合は設定UIで保存された値(DPAPI暗号化・<paramref name="settings"/>)に
+    /// フォールバックする。翻訳エンジンの優先順位・有効/無効も<paramref name="settings"/>に従う。</summary>
+    public static IServiceCollection AddSelectionTranslationFeature(
+        this IServiceCollection services, TranslationSettings settings)
     {
         services.AddSingleton<IClipboardAccessor, WpfClipboardAccessor>();
         services.AddSingleton<ICopyCommandSender, SendInputCopyCommandSender>();
@@ -50,15 +53,17 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITranslator>(sp =>
         {
             var httpClient = sp.GetRequiredService<System.Net.Http.IHttpClientFactory>().CreateClient(string.Empty);
-            var apiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY");
-            var region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION");
+            var apiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY")
+                ?? settings.ApiKeys.GetValueOrDefault("Azure");
+            var region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION")
+                ?? settings.ApiKeys.GetValueOrDefault("AzureRegion");
             return new AzureTranslator(httpClient, apiKey, region);
         });
 
         services.AddSingleton<ITranslationCache>(_ => new LruTranslationCache());
         services.AddSingleton<ICircuitBreaker>(_ => new ConsecutiveFailureCircuitBreaker());
         services.AddSingleton<ITranslationOrchestrator>(sp => new TranslationOrchestrator(
-            sp.GetServices<ITranslator>().ToList(),
+            TranslatorPriorityFilter.Apply(sp.GetServices<ITranslator>().ToList(), settings),
             sp.GetRequiredService<ITranslationCache>(),
             sp.GetRequiredService<ICircuitBreaker>()));
 
