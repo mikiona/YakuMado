@@ -26,10 +26,15 @@ public sealed class SelectionAcquisitionChain : ISelectionAcquisitionChain
             {
                 result = await provider.TryGetSelectedTextAsync(cancellationToken);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[選択取得:{provider.ProviderName}] 例外発生: {ex.GetType().Name}: {ex.Message}");
                 continue;
             }
+
+            Console.WriteLine(string.IsNullOrEmpty(result)
+                ? $"[選択取得:{provider.ProviderName}] 結果なし"
+                : $"[選択取得:{provider.ProviderName}] 取得成功(文字数: {result.Length})");
 
             if (!string.IsNullOrEmpty(result))
             {

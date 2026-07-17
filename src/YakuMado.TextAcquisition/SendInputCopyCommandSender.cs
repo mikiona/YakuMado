@@ -18,6 +18,7 @@ public sealed class SendInputCopyCommandSender : ICopyCommandSender
         // 対象アプリからはCtrl+Alt+Cとして解釈されコピーが実行されないため、
         // Altが押下中であれば先にキーアップを合成してから送出する。
         var altPressed = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+        Console.WriteLine($"[SendCopy] Alt押下検出: {altPressed}");
 
         var inputs = new List<INPUT>(5);
         if (altPressed)
@@ -30,7 +31,12 @@ public sealed class SendInputCopyCommandSender : ICopyCommandSender
         inputs.Add(KeyInput(VK_CONTROL, keyUp: true));
 
         var array = inputs.ToArray();
-        SendInput((uint)array.Length, array, Marshal.SizeOf<INPUT>());
+        var sent = SendInput((uint)array.Length, array, Marshal.SizeOf<INPUT>());
+        Console.WriteLine($"[SendCopy] SendInput結果: {sent}/{array.Length}件受理 (0の場合はGetLastErrorで原因確認要)");
+        if (sent == 0)
+        {
+            Console.WriteLine($"[SendCopy] GetLastError: {Marshal.GetLastWin32Error()}");
+        }
     }
 
     private static INPUT KeyInput(int virtualKeyCode, bool keyUp) => new()
