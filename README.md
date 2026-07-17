@@ -14,8 +14,29 @@ Windows用の翻訳ソフト。Webブラウザや各種アプリの画面上に�
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - 画面オーバーレイ翻訳(F2)を使う場合: Windows OCRの英語(en)言語パック
   (「設定 > 時刻と言語 > 言語と地域」からインストール。未インストールの場合、起動時にコンソールへ警告が表示される)
-- クラウド翻訳を使う場合: Azure Translatorのリソース(APIキー・リージョン)
+- クラウド翻訳を使う場合: Azure Translatorのリソース(APIキー・リージョン)。作成手順は下記「Azure Translatorリソースの作成手順」を参照
 - 実験的ローカルNMTを使う場合(任意): [uv](https://docs.astral.sh/uv/)、Python 3.11
+
+## Azure Translatorリソースの作成手順
+
+クラウド翻訳(AzureTranslator)を使うには、Azureアカウントと「Translator」リソースが必要。手順は以下の通り(2026年7月時点のAzure Portalに基づく。UIは変更される可能性があるため、最新版は[公式ドキュメント](https://learn.microsoft.com/azure/ai-services/translator/how-to/create-translator-resource)を参照)。
+
+1. [Azureアカウント](https://azure.microsoft.com/pricing/purchase-options/azure-account)を用意する(未所持の場合は無料アカウントを作成できる)。
+2. [Azure Portal](https://portal.azure.com/)にサインインし、「リソースの作成」からTranslatorを検索する。
+   直接リンク: [単一サービスのTranslatorリソースを作成](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextTranslation)
+   (YakuMadoは標準のText Translation REST API(v3.0)のみを使うため、「Foundry」や「複数サービス」リソースは不要。単一サービスの「Translator」リソースで十分)
+3. 作成画面で以下を入力する。
+   - **サブスクリプション**: 使用するAzureサブスクリプションを選択
+   - **リソースグループ**: 既存のものを選ぶか新規作成
+   - **リージョン**: 特別な理由がなければ `Global` を選択(特定リージョンでの利用が必要な場合のみ地域を指定)
+   - **名前**: Azure内で一意な任意の名前
+   - **価格レベル**: 無料枠(F0)は1サブスクリプションにつき1つ、期限なしで利用可能(有料プランと同じ機能が使える)。試用にはF0で十分
+4. 「確認と作成」→「作成」でリソースをデプロイする。
+5. デプロイ完了後、「リソースに移動」を選択し、リソース画面の左メニュー「リソース管理」内の「**キーとエンドポイント**」を開く。
+6. 表示された**キー**(KEY 1またはKEY 2のどちらか)と**リージョン**(手順3で`Global`を選んだ場合は`global`ではなく、実際にリソースが作成された場所の表示に従う)を控える。
+7. 控えたキー・リージョンを、本アプリの環境変数(`AZURE_TRANSLATOR_KEY`/`AZURE_TRANSLATOR_REGION`)またはトレイアイコンの「設定...」画面に設定する(詳細は下記「実行方法」「環境変数一覧」を参照)。
+
+不要になったら、Azure Portalの「リソースグループ」からリソース(またはリソースグループごと)を削除できる。
 
 ## ビルド方法
 
