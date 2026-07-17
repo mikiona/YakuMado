@@ -6,19 +6,31 @@ namespace YakuMado.TextAcquisition;
 public sealed class SendInputCopyCommandSender : ICopyCommandSender
 {
     private const int VK_CONTROL = 0x11;
+    private const int VK_MENU = 0x12; // Alt
     private const int VK_C = 0x43;
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const int INPUT_KEYBOARD = 1;
 
     public void SendCopy()
     {
-        var inputs = new INPUT[4];
-        inputs[0] = KeyInput(VK_CONTROL, keyUp: false);
-        inputs[1] = KeyInput(VK_C, keyUp: false);
-        inputs[2] = KeyInput(VK_C, keyUp: true);
-        inputs[3] = KeyInput(VK_CONTROL, keyUp: true);
+        // 本アプリのグローバルホットキーはCtrl+Alt+*であり、WM_HOTKEYはユーザーが
+        // まだAltキーを物理的に押している間に発火する。この状態のままCtrl+Cを合成送出すると、
+        // 対象アプリからはCtrl+Alt+Cとして解釈されコピーが実行されないため、
+        // Altが押下中であれば先にキーアップを合成してから送出する。
+        var altPressed = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
 
-        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+        var inputs = new List<INPUT>(5);
+        if (altPressed)
+        {
+            inputs.Add(KeyInput(VK_MENU, keyUp: true));
+        }
+        inputs.Add(KeyInput(VK_CONTROL, keyUp: false));
+        inputs.Add(KeyInput(VK_C, keyUp: false));
+        inputs.Add(KeyInput(VK_C, keyUp: true));
+        inputs.Add(KeyInput(VK_CONTROL, keyUp: true));
+
+        var array = inputs.ToArray();
+        SendInput((uint)array.Length, array, Marshal.SizeOf<INPUT>());
     }
 
     private static INPUT KeyInput(int virtualKeyCode, bool keyUp) => new()
@@ -36,6 +48,9 @@ public sealed class SendInputCopyCommandSender : ICopyCommandSender
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct INPUT
