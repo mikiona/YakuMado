@@ -65,10 +65,27 @@ public sealed class SendInputCopyCommandSender : ICopyCommandSender
         public InputUnion U;
     }
 
+    // WindowsネイティブのINPUT共用体はMOUSEINPUT/KEYBDINPUT/HARDWAREINPUTのうち
+    // 最大のMOUSEINPUT(x64で32バイト)を基準にサイズが決まる(INPUT全体で40バイト)。
+    // KEYBDINPUTのみを含めるとx64で32バイトになりSendInputに渡すcbSizeが実際の
+    // ネイティブサイズと一致せず、SendInputが入力を1件も受理せず0を返す不具合があったため、
+    // 未使用でもMOUSEINPUTを共用体に含めてサイズを一致させる。
     [StructLayout(LayoutKind.Explicit)]
     private struct InputUnion
     {
+        [FieldOffset(0)] public MOUSEINPUT mi;
         [FieldOffset(0)] public KEYBDINPUT ki;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MOUSEINPUT
+    {
+        public int dx;
+        public int dy;
+        public uint mouseData;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
     }
 
     [StructLayout(LayoutKind.Sequential)]
